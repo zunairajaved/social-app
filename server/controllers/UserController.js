@@ -50,8 +50,6 @@ exports.signup = async (req, res) => {
         console.log(err);
       }
 }
-
-
 exports.signin = async (req,res) => {
     try {
         // Get user input
@@ -63,8 +61,6 @@ exports.signin = async (req,res) => {
         }
         // Validate if user exist in our database
         const user = await User.findOne({ email });
-        console.log(user);
-    console.log(await bcrypt.compare(password, user.password));
         if (user && (await bcrypt.compare(password, user.password))) {
           // Create token
           const token = jwt.sign(

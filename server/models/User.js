@@ -17,6 +17,9 @@ const userSchema = new mongoose.Schema({
       type: String ,
       required: true
     },
+    profile_image:{
+        type:String
+    },
   token:{ 
       type: String 
     },
@@ -25,4 +28,4 @@ const userSchema = new mongoose.Schema({
     timestamps:true
 });
 
-module.exports = mongoose.model("user", userSchema);
+module.exports = mongoose.model("User", userSchema);
