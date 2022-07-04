@@ -10,5 +10,6 @@ router.get('/', auth, function(req, res, next) {
 
 router.post('/register',userController.signup);
 router.post('/login',userController.signin);
-
+router.post('/update/profile',userController.updateProfile);
+router.post('/get/profile',userController.getProfile);
 module.exports = router;

@@ -2,8 +2,13 @@ const User = require("../models/User");
 const config = require("../config");
 var jwt = require("jsonwebtoken");
 var bcrypt = require("bcryptjs");
-
-exports.signup = async (req, res) => {
+/**
+ * Register new user
+ * @param {*} req 
+ * @param {*} res 
+ * @returns 
+ */
+const signup = async (req, res) => {
 
     try {
         // Get user input
@@ -50,7 +55,12 @@ exports.signup = async (req, res) => {
         console.log(err);
       }
 }
-exports.signin = async (req,res) => {
+/**
+ * Login user
+ * @param {*} req 
+ * @param {*} res 
+ */
+const signin = async (req,res) => {
     try {
         // Get user input
         const { email, password } = req.body;
@@ -81,4 +91,46 @@ exports.signin = async (req,res) => {
       } catch (err) {
         console.log(err);
       }
+}
+/**
+ * Get user profile
+ * @param {*} req 
+ * @param {*} res 
+ * @param {*} next 
+ */
+const getProfile = (req,res,next) => {
+    User.findById(req.user._id)
+    .then((user) => {
+        res.status(200).send(user);   
+    }, (err) => next(err))
+    .catch((err) => next(err));
+}
+/**
+ * Update user profile
+ * @param {*} req 
+ * @param {*} res 
+ * @param {*} next 
+ */
+const updateProfile = (req,res,next)=> {
+User.findById(req.user._id)
+.then((user) => {
+    if (user != null) {
+        User.findByIdAndUpdate(req.user._id, {
+            $set: req.body
+        }, { new: true })
+        .then((user) => {
+            res.status(200).send(user);             
+        }, (err) => next(err));
+    }
+        err = new Error('Post ' + req.params.userId + ' not found');
+        err.status = 404;
+        return next(err);            
+}, (err) => next(err))
+.catch((err) => next(err));
+}
+module.exports = {
+  signup,
+  signin,
+  getProfile,
+  updateProfile,
 }

@@ -1,43 +1,107 @@
 const Post = require("../models/Post");
 
-
-const getPosts = async( req,res) => {
+/**
+ * Get all posts 
+ * @param {*} req 
+ * @param {*} res 
+ * @param {*} next 
+ */
+const getPosts = async( req,res,next) => {
     Post.find(req.quert)
     .then((post)=>{
         res.status(200).send(post);
-    })
-    .catch(err =>{
-        res.status(500).send({ message: err.message });
-    });
+    },(err) => next(err))
+    .catch(err => next(err));
 }
-const createPost = async (req,res) => {
-Post.create({
-    title: req.body.title,
-    text:req.body.text,
-    // postedBy:req.user._id,
-})
-.then((post)=>{
-    res.status(200).send(post);
-}).catch(err =>{
-    res.status(500).send({message:err.message});
-});
+/**
+ * Create new post
+ * @param {*} req 
+ * @param {*} res 
+ * @param {*} next 
+ * @returns 
+ */
+const createPost = async (req,res,next) => {
+    if (req.body != null) {
+        Post.create({
+            title: req.body.title,
+            text:req.body.text,
+            // postedBy:req.user._id,
+        })
+        .then((post) => {
+            res.status(200).send(post);
+        }, (err) => next(err))
+        .catch((err) => next(err));
+    }
+        err = new Error('post not found in request body');
+        err.status = 404;
+        return next(err);
 };
-const uploadImage = async(req,res) => {
-    console.log("id",req.params.postId);
-    var postId = req.params.postId;
-    var post = await Post.findById(postId);
-    post.thumbnail = req.body.image
-    console.log(post);
-    post.save({
-        thumbnail:req.body.image
-    });
-    res.status(200).send({message:'image uploaded successfully'});
+
+/**
+ * Update post
+ * @param {*} req 
+ * @param {*} res 
+ * @param {*} next 
+ */
+const updatePost = (req, res,next) => {
+    Post.findById(req.params.postId)
+    .then((post) => {
+        if (post != null) {
+            Post.findByIdAndUpdate(req.params.postId, {
+                $set: req.body
+            }, { new: true })
+            .then((post) => {
+                res.status(200).send(post);             
+            }, (err) => next(err));
+        }
+            err = new Error('Post ' + req.params.postId + ' not found');
+            err.status = 404;
+            return next(err);            
+    }, (err) => next(err))
+    .catch((err) => next(err));
+  };
+  /**
+   * Get single post by id
+   * @param {*} req 
+   * @param {*} res 
+   * @param {*} next 
+   */
+const getSinglePost = (req,res,next) => {
+    Post.findById(req.params.postId)
+    .then((post) => {
+        res.status(200).send(post);   
+    }, (err) => next(err))
+    .catch((err) => next(err));
 }
 
+/**
+ * Delete post
+ * @param {*} req 
+ * @param {*} res 
+ * @param {*} next 
+ */
+const destroyPost = (req,res,next) => {
+    Post.findById(req.params.postId)
+    .then((post) => {
+        if (post != null) {
+            Post.findByIdAndRemove(req.params.postId)
+            .then((post) => {
+                res.status(200).send(post);   
+            }, (err) => next(err))
+            .catch((err) => next(err));
+        }
+            err = new Error('Post ' + req.params.postId + ' not found');
+            err.status = 404;
+            return next(err);            
+    }, (err) => next(err))
+    .catch((err) => next(err));
+}
 module.exports = {
     getPosts,
     createPost,
-    uploadImage
+    updatePost,
+    getSinglePost,
+    destroyPost
 }
 
 
